@@ -1,0 +1,6 @@
+@PragueMicroclimateProject_HostAddress = http://localhost:5038
+
+GET {{PragueMicroclimateProject_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

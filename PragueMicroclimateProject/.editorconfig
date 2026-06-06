@@ -1,0 +1,49 @@
+# C# files
+[*.cs]
+
+# ---- personal ----
+
+# Missing XML comment for publicly visible type or member
+dotnet_diagnostic.CS1591.severity = error
+
+# Local variable declared but never used
+dotnet_diagnostic.CS0168.severity = error
+
+# Local variable assigned, but its value is never used
+dotnet_diagnostic.CS0219.severity = error
+
+# Unnecessary value assignment
+dotnet_diagnostic.IDE0059.severity = error
+
+# Unused private methods / fields / properties / events
+dotnet_diagnostic.IDE0051.severity = error
+
+# Private field/property is assigned but never read
+dotnet_diagnostic.IDE0052.severity = error
+
+# Unused parameters
+dotnet_code_quality_unused_parameters = all
+dotnet_diagnostic.IDE0060.severity = error
+
+# Optional: older code analysis rule for unused parameters
+dotnet_diagnostic.CA1801.severity = error
+
+# Unused using directives
+dotnet_diagnostic.IDE0005.severity = error
+
+# Prefer file-scoped namespaces
+csharp_style_namespace_declarations = file_scoped:error
+
+# Disable primary constructor suggestion
+dotnet_diagnostic.IDE0290.severity = none
+
+# Do not report non-nullable properties that are not initialized
+dotnet_diagnostic.CS8618.severity = none
+
+# Require braces for if/else/for/foreach/while/do/using/lock/fixed statements
+csharp_prefer_braces = true:error
+
+# Report missing braces as an error
+dotnet_diagnostic.IDE0011.severity = error
+
+# ---- / personal ----
