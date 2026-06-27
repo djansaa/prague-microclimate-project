@@ -1,7 +1,7 @@
 namespace PragueMicroclimateProject.WebServices.Golemio.Codelists;
 
 /// <summary>
-/// Internal microclimate measure type codelist.
+/// External microclimate measure type codelist.
 /// </summary>
 public static class MicroclimateMeasureType
 {

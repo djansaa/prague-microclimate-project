@@ -3,9 +3,9 @@ import PragueMap from "../features/map/components/PragueMap";
 
 function App() {
     return (
-        <>
-            <PragueMap/>
-        </>
+        <main className="app-shell">
+            <PragueMap />
+        </main>
     );
 }
 
