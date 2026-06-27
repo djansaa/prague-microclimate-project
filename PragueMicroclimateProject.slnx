@@ -1,3 +1,7 @@
 <Solution>
+  <Project Path="PragueMicroclimateProject.Frontend/praguemicroclimateproject.frontend.esproj">
+    <Build />
+    <Deploy />
+  </Project>
   <Project Path="PragueMicroclimateProject/PragueMicroclimateProject.csproj" />
 </Solution>

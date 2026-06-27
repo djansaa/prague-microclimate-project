@@ -8,7 +8,7 @@ namespace PragueMicroclimateProject.DependencyInjection;
 public static class ConfigureServiceCollection
 {
     /// <summary>
-    /// Registers external API services in DI container.
+    /// Register external API services in DI container.
     /// </summary>
     public static void AddWebServices(this IServiceCollection services)
     {

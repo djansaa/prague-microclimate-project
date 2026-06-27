@@ -23,7 +23,7 @@ public class Measurement
     /// MeasuredAt [example: "2022-08-21T17:30:00.000Z"]
     /// </summary>
     [JsonPropertyName("measured_at")]
-    public string? MeasuredAt { get; set; }
+    public DateTimeOffset? MeasuredAt { get; set; }
 
     /// <summary>
     /// Measure [example: "air_temp200"]

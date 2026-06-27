@@ -1,0 +1,471 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "PragueMicroclimateProject",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/Microclimate/locations": {
+      "get": {
+        "tags": [
+          "Microclimate"
+        ],
+        "summary": "Get ALL microclimate locations.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Location"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Location"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Location"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Microclimate/locationsAndPoints": {
+      "get": {
+        "tags": [
+          "Microclimate"
+        ],
+        "summary": "Get ALL microclimate locations and points.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Point3"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Point3"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Point3"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Microclimate/pointMeasurements": {
+      "get": {
+        "tags": [
+          "Microclimate"
+        ],
+        "summary": "Get point measurements.",
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pointId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "measure",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Measurement"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Measurement"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Measurement"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Microclimate/pointMeasurementsParallel": {
+      "get": {
+        "tags": [
+          "Microclimate"
+        ],
+        "summary": "Get point measurements.",
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pointId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "measure",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Measurement"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Measurement"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Measurement"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Location": {
+        "type": "object",
+        "properties": {
+          "location_id": {
+            "type": "integer",
+            "description": "LocationId",
+            "format": "int32"
+          },
+          "location": {
+            "type": "string",
+            "description": "LocationName [example: \"Pražská Holešovická tržnice\"]",
+            "nullable": true
+          },
+          "loc_description": {
+            "type": "string",
+            "description": "LocDescription [example: \"areál bez zeleně\"]",
+            "nullable": true
+          },
+          "loc_orientation": {
+            "type": "string",
+            "description": "LocOrientation [example: \"východ-západ\"]",
+            "nullable": true
+          },
+          "loc_surface": {
+            "type": "string",
+            "description": "LocSurface [example: \"asfalt/beton\"]",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "description": "Address [example: \"Pražská tržnice\"]",
+            "nullable": true
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationPoint"
+            },
+            "description": "Points",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Microclimate location response model."
+      },
+      "LocationPoint": {
+        "type": "object",
+        "properties": {
+          "point_id": {
+            "type": "integer",
+            "description": "PointId",
+            "format": "int32"
+          },
+          "point_name": {
+            "type": "string",
+            "description": "PointName [example: \"Pražská tržnice osvětlení\"]",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Microclimate location point response model."
+      },
+      "Measurement": {
+        "type": "object",
+        "properties": {
+          "point_id": {
+            "type": "number",
+            "description": "PointId",
+            "format": "double",
+            "nullable": true
+          },
+          "location_id": {
+            "type": "number",
+            "description": "LocationId",
+            "format": "double",
+            "nullable": true
+          },
+          "measured_at": {
+            "type": "string",
+            "description": "MeasuredAt [example: \"2022-08-21T17:30:00.000Z\"]",
+            "format": "date-time",
+            "nullable": true
+          },
+          "measure": {
+            "type": "string",
+            "description": "Measure [example: \"air_temp200\"]",
+            "nullable": true
+          },
+          "value": {
+            "type": "number",
+            "description": "Value",
+            "format": "double",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit [example: \"°C\"]",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Microclimate measurement response model."
+      },
+      "Point3": {
+        "type": "object",
+        "properties": {
+          "point_id": {
+            "type": "integer",
+            "description": "PointId",
+            "format": "int32"
+          },
+          "location_id": {
+            "type": "integer",
+            "description": "LocationId",
+            "format": "int32"
+          },
+          "point_named": {
+            "type": "string",
+            "description": "PointNamed [example: \"Pražská tržnice osvětlení\"]",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "description": "LocationName [example: \"Pražská Holešovická tržnice\"]",
+            "nullable": true
+          },
+          "loc_description": {
+            "type": "string",
+            "description": "LocDescription [example: \"areál bez zeleně\"]",
+            "nullable": true
+          },
+          "loc_orientation": {
+            "type": "string",
+            "description": "LocOrientation [example: \"východ-západ\"]",
+            "nullable": true
+          },
+          "loc_surface": {
+            "type": "string",
+            "description": "LocSurface [example: \"asfalt/beton\"]",
+            "nullable": true
+          },
+          "lat": {
+            "type": "number",
+            "description": "Lat",
+            "format": "double",
+            "nullable": true
+          },
+          "lng": {
+            "type": "number",
+            "description": "Lng",
+            "format": "double",
+            "nullable": true
+          },
+          "x_jtsk": {
+            "type": "number",
+            "description": "XJtsk",
+            "format": "double",
+            "nullable": true
+          },
+          "y_jtsk": {
+            "type": "number",
+            "description": "YJtsk",
+            "format": "double",
+            "nullable": true
+          },
+          "elevation_m": {
+            "type": "number",
+            "description": "ElevationM",
+            "format": "double",
+            "nullable": true
+          },
+          "measures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Point3Measure"
+            },
+            "description": "Measures",
+            "nullable": true
+          },
+          "sensor_position": {
+            "type": "string",
+            "description": "SensorPosition [example: \"veřejné osvětlení\"]",
+            "nullable": true
+          },
+          "sensor_position_detail": {
+            "type": "string",
+            "description": "SensorPositionDetail [example: \"veřejné osvětlení ve středu Tržnice\"]",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Microclimate point response model."
+      },
+      "Point3Measure": {
+        "type": "object",
+        "properties": {
+          "measure": {
+            "type": "string",
+            "description": "Measure [example: \"air_temp200\"]",
+            "nullable": true
+          },
+          "measure_cz": {
+            "type": "string",
+            "description": "MeasureCz [example: \"Teplota vzduchu, 200 cm\"]",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit [example: \"°C\"]",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Microclimate point measure response model."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Microclimate"
+    }
+  ]
+}

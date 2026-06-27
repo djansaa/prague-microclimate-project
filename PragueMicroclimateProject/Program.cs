@@ -1,27 +1,78 @@
 using PragueMicroclimateProject.DependencyInjection;
+using Serilog;
+using System.Reflection;
 
-var builder = WebApplication.CreateBuilder(args);
+// create bootstrap serilog logger
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
-builder.Services.AddWebServices();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
+    var builder = WebApplication.CreateBuilder(args);
+
+    Log.Information("Application is starting");
+
+    // ### Logging ###
+
+    builder.Host.UseSerilog((context, configuration) =>
+    {
+        configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .WriteTo.Console(); // always write to console (do not have to be in serilog config)
+    });
+
+    // ### Add services ###
+
+    builder.Services.AddControllers();
+
+    builder.Services.AddSwaggerGen(options =>
+    {
+        // add description to the models / endpoints
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        options.IncludeXmlComments(xmlPath);
+    });
+
+    builder.Services.AddHybridCache();
+
+    // ### Add custom services ###
+
+    builder.Services.AddWebServices();
+
+    // ### Build app ###
+
+    var app = builder.Build();
+
+    app.Logger.LogInformation("Environment: {EnvironmentName}", app.Environment.EnvironmentName);
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage(); // detailed error page for development
+    }
+
+    // swagger
+    app.UseSwagger();
+    app.UseSwaggerUI();
+
+    app.UseSerilogRequestLogging(); // log HTTP requests
+
+    app.UseStatusCodePages();
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

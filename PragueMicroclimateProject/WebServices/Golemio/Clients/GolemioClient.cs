@@ -22,7 +22,7 @@ public class GolemioClient
     #region Microclimate (v2)
 
     /// <summary>
-    /// GET All Microclimate Sensor Locations
+    /// GET All Microclimate Sensor Locations. Optionally filter by locationId otherwise returns all locations.
     /// </summary>
     public Task<List<Location>?> GetMicroclimateLocationsAsync(int? locationId = null, CancellationToken cancellationToken = default)
     {
@@ -37,10 +37,12 @@ public class GolemioClient
     }
 
     /// <summary>
-    /// GET Microclimate Sensor Points
+    /// GET Microclimate Sensor Points. Optionally filter by locationId and /or pointId.
+    /// Return all information about location and its point except measurements.
     /// </summary>
-    public Task<Point3?> GetMicroclimatePointsAsync(int? locationId = null, int? pointId = null, CancellationToken cancellationToken = default)
+    public Task<List<Point3>?> GetMicroclimatePointsAsync(int? locationId = null, int? pointId = null, CancellationToken cancellationToken = default)
     {
+        // Warning: Golemio API has wrong docs description - it returns list of points, not single point.
         var endpoint = "/v2/microclimate/points";
 
         if (locationId.HasValue)
@@ -53,11 +55,11 @@ public class GolemioClient
             endpoint = QueryHelpers.AddQueryString(endpoint, "pointId", pointId.Value.ToString(CultureInfo.InvariantCulture));
         }
 
-        return _client.GetFromJsonAsync<Point3>(endpoint, cancellationToken);
+        return _client.GetFromJsonAsync<List<Point3>>(endpoint, cancellationToken);
     }
 
     /// <summary>
-    /// GET All Microclimate Sensor Measurements
+    /// GET All Microclimate Sensor Measurements. Optionally filter by locationId, pointId, measure, from and to.
     /// </summary>
     public Task<List<Measurement>?> GetMicroclimateMeasurementsAsync(int? locationId = null, int? pointId = null, string? measure = null, DateTimeOffset? from = null, DateTimeOffset? to = null, CancellationToken cancellationToken = default)
     {
