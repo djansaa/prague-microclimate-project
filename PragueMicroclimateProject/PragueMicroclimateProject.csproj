@@ -16,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
     <Folder Include="WebServices\Golemio\Models\" />
     <Folder Include="WebServices\Golemio\Codelists\" />
   </ItemGroup>

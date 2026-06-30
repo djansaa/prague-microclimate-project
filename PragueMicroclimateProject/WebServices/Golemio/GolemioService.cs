@@ -26,16 +26,16 @@ public partial class GolemioService
     /// <summary>
     /// Get all locations from Golemio.
     /// </summary>
-    public async ValueTask<List<Location>> GetAllLocations(CancellationToken cancellationToken = default)
+    public async Task<List<Location>> GetAllLocations(CancellationToken cancellationToken = default)
     {
         var cacheKey = "golemio:microclimate:locations:all";
 
         var locations = await _hybridCache.GetOrCreateAsync(
             cacheKey,
-            token =>
+            async token =>
             {
                 _logger.LogDebug("Cache miss for {CacheKey}", cacheKey);
-                return new ValueTask<List<Location>?>(_client.GetMicroclimateLocationsAsync(cancellationToken: token));
+                return await _client.GetMicroclimateLocationsAsync(cancellationToken: token);
             },
             options: new HybridCacheEntryOptions
             {
@@ -50,16 +50,16 @@ public partial class GolemioService
     /// <summary>
     /// Get all locations and their points from Golemio.
     /// </summary>
-    public async ValueTask<List<Point3>> GetAllLocationAndPoints(CancellationToken cancellationToken = default)
+    public async Task<List<Point3>> GetAllLocationAndPoints(CancellationToken cancellationToken = default)
     {
         var cacheKey = "golemio:microclimate:locations-points:all";
 
         var points = await _hybridCache.GetOrCreateAsync(
             cacheKey,
-            token =>
+            async token =>
             {
                 _logger.LogDebug("Cache miss for {CacheKey}", cacheKey);
-                return new ValueTask<List<Point3>?>(_client.GetMicroclimatePointsAsync(cancellationToken: token));
+                return await _client.GetMicroclimatePointsAsync(cancellationToken: token);
             },
             options: new HybridCacheEntryOptions
             {
