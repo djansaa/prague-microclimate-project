@@ -10,69 +10,52 @@
  * ---------------------------------------------------------------
  */
 
-/** Microclimate location response model. */
+/** Represents a microclimate location in Prague. */
 export interface Location {
-  /** Address [example: "Pražská tržnice"] */
-  address?: string | null;
-  /** LocDescription [example: "areál bez zeleně"] */
-  loc_description?: string | null;
-  /** LocOrientation [example: "východ-západ"] */
-  loc_orientation?: string | null;
-  /** LocSurface [example: "asfalt/beton"] */
-  loc_surface?: string | null;
-  /** LocationName [example: "Pražská Holešovická tržnice"] */
-  location?: string | null;
+  /** Human-readable description of the location. */
+  description?: string | null;
   /**
-   * LocationId
+   * Unique identifier of the location.
    * @format int32
    */
-  location_id?: number;
-  /** Points */
-  points?: LocationPoint[] | null;
+  id?: number | null;
+  /** Display name of the location. */
+  name?: string | null;
+  /** Measurement points belonging to the location. */
+  points?: Point[] | null;
+  /** Surface type associated with the location. */
+  surface?: string | null;
 }
 
-/** Microclimate location point response model. */
-export interface LocationPoint {
-  /**
-   * PointId
-   * @format int32
-   */
-  point_id?: number;
-  /** PointName [example: "Pražská tržnice osvětlení"] */
-  point_name?: string | null;
-}
-
-/** Microclimate measurement response model. */
+/** Represents a normalized microclimate measurement. */
 export interface Measurement {
   /**
-   * LocationId
-   * @format double
+   * Identifier of the location the measurement belongs to.
+   * @format int32
    */
-  location_id?: number | null;
-  /** Measure [example: "air_temp200"] */
-  measure?: string | null;
+  locationId?: number | null;
   /**
-   * MeasuredAt [example: "2022-08-21T17:30:00.000Z"]
+   * Identifier of the point the measurement belongs to.
+   * @format int32
+   */
+  pointId?: number | null;
+  /**
+   * Date and time when the value was measured.
    * @format date-time
    */
-  measured_at?: string | null;
-  /**
-   * PointId
-   * @format double
-   */
-  point_id?: number | null;
-  /** Unit [example: "°C"] */
+  timestamp?: string | null;
+  /** Internal measurement type code. */
+  type?: string | null;
+  /** Unit of the measured value. */
   unit?: string | null;
   /**
-   * Value
+   * Numeric value of the measurement.
    * @format double
    */
   value?: number | null;
 }
 
-export type MicroclimateLocationsAndPointsListData = Point3[];
-
-export type MicroclimateLocationsListData = Location[];
+export type MicroclimateLocationsAndPointsListData = Location[];
 
 export type MicroclimatePointMeasurementsListData = Measurement[];
 
@@ -102,69 +85,31 @@ export interface MicroclimatePointMeasurementsParallelListParams {
   to?: string;
 }
 
-/** Microclimate point response model. */
-export interface Point3 {
+/** Represents a measurement point within a microclimate location. */
+export interface Point {
+  /** Human-readable description of the point. */
+  description?: string | null;
   /**
-   * ElevationM
-   * @format double
-   */
-  elevation_m?: number | null;
-  /**
-   * Lat
-   * @format double
-   */
-  lat?: number | null;
-  /**
-   * Lng
-   * @format double
-   */
-  lng?: number | null;
-  /** LocDescription [example: "areál bez zeleně"] */
-  loc_description?: string | null;
-  /** LocOrientation [example: "východ-západ"] */
-  loc_orientation?: string | null;
-  /** LocSurface [example: "asfalt/beton"] */
-  loc_surface?: string | null;
-  /** LocationName [example: "Pražská Holešovická tržnice"] */
-  location?: string | null;
-  /**
-   * LocationId
+   * Unique identifier of the point.
    * @format int32
    */
-  location_id?: number;
-  /** Measures */
-  measures?: Point3Measure[] | null;
+  id?: number | null;
   /**
-   * PointId
-   * @format int32
-   */
-  point_id?: number;
-  /** PointNamed [example: "Pražská tržnice osvětlení"] */
-  point_named?: string | null;
-  /** SensorPosition [example: "veřejné osvětlení"] */
-  sensor_position?: string | null;
-  /** SensorPositionDetail [example: "veřejné osvětlení ve středu Tržnice"] */
-  sensor_position_detail?: string | null;
-  /**
-   * XJtsk
+   * Latitude of the point.
    * @format double
    */
-  x_jtsk?: number | null;
+  latitude?: number | null;
   /**
-   * YJtsk
+   * Longitude of the point.
    * @format double
    */
-  y_jtsk?: number | null;
-}
-
-/** Microclimate point measure response model. */
-export interface Point3Measure {
-  /** Measure [example: "air_temp200"] */
-  measure?: string | null;
-  /** MeasureCz [example: "Teplota vzduchu, 200 cm"] */
-  measure_cz?: string | null;
-  /** Unit [example: "°C"] */
-  unit?: string | null;
+  longitude?: number | null;
+  /** Measurement types available for the point. */
+  measurementTypes?: string[] | null;
+  /** Display name of the point. */
+  name?: string | null;
+  /** Physical placement or sensor position of the point. */
+  sensorPosition?: string | null;
 }
 
 export type QueryParamsType = Record<string | number, any>;
@@ -445,22 +390,6 @@ export class Api<SecurityDataType extends unknown> {
     microclimateLocationsAndPointsList: (params: RequestParams = {}) =>
       this.http.request<MicroclimateLocationsAndPointsListData, any>({
         path: `/api/Microclimate/locationsAndPoints`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Microclimate
-     * @name MicroclimateLocationsList
-     * @summary Get ALL microclimate locations.
-     * @request GET:/api/Microclimate/locations
-     */
-    microclimateLocationsList: (params: RequestParams = {}) =>
-      this.http.request<MicroclimateLocationsListData, any>({
-        path: `/api/Microclimate/locations`,
         method: "GET",
         format: "json",
         ...params,

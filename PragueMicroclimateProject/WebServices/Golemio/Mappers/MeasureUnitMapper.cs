@@ -1,4 +1,5 @@
 using PragueMicroclimateProject.Models.Codelists;
+using PragueMicroclimateProject.WebServices.Golemio.Codelists;
 
 namespace PragueMicroclimateProject.WebServices.Golemio.Mappers;
 
@@ -12,11 +13,9 @@ public static class MeasureUnitMapper
     /// </summary>
     public static string ToInternal(string? golemioUnit) => golemioUnit switch
     {
-        "\u00B0C" => MeasurementUnitCodelist.Celsius,
-        "\u00C2\u00B0C" => MeasurementUnitCodelist.Celsius,
-        "deg C" => MeasurementUnitCodelist.Celsius,
-        "%" => MeasurementUnitCodelist.Percent,
-        "km/h" => MeasurementUnitCodelist.KilometersPerHour,
+        MicroclimateMeasureUnit.DegreesCelsius => MeasurementUnitCodelist.Celsius,
+        MicroclimateMeasureUnit.Percent => MeasurementUnitCodelist.Percent,
+        MicroclimateMeasureUnit.KilometersPerHour => MeasurementUnitCodelist.KilometersPerHour,
         _ => throw new ArgumentOutOfRangeException(nameof(golemioUnit), golemioUnit, "Unknown Golemio measure unit")
     };
 
@@ -25,9 +24,9 @@ public static class MeasureUnitMapper
     /// </summary>
     public static string ToExternal(string? measureUnit) => measureUnit switch
     {
-        MeasurementUnitCodelist.Celsius => "\u00B0C",
-        MeasurementUnitCodelist.Percent => "%",
-        MeasurementUnitCodelist.KilometersPerHour => "km/h",
+        MeasurementUnitCodelist.Celsius => MicroclimateMeasureUnit.DegreesCelsius,
+        MeasurementUnitCodelist.Percent => MicroclimateMeasureUnit.Percent,
+        MeasurementUnitCodelist.KilometersPerHour => MicroclimateMeasureUnit.KilometersPerHour,
         _ => throw new ArgumentOutOfRangeException(nameof(measureUnit), measureUnit, "Unknown internal measure unit")
     };
 }

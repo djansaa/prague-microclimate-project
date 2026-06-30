@@ -5,45 +5,6 @@
     "version": "1.0"
   },
   "paths": {
-    "/api/Microclimate/locations": {
-      "get": {
-        "tags": [
-          "Microclimate"
-        ],
-        "summary": "Get ALL microclimate locations.",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Location"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Location"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Location"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Microclimate/locationsAndPoints": {
       "get": {
         "tags": [
@@ -58,7 +19,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Point3"
+                    "$ref": "#/components/schemas/Location"
                   }
                 }
               },
@@ -66,7 +27,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Point3"
+                    "$ref": "#/components/schemas/Location"
                   }
                 }
               },
@@ -74,7 +35,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Point3"
+                    "$ref": "#/components/schemas/Location"
                   }
                 }
               }
@@ -249,217 +210,127 @@
       "Location": {
         "type": "object",
         "properties": {
-          "location_id": {
+          "id": {
             "type": "integer",
-            "description": "LocationId",
-            "format": "int32"
-          },
-          "location": {
-            "type": "string",
-            "description": "LocationName [example: \"Pražská Holešovická tržnice\"]",
+            "description": "Unique identifier of the location.",
+            "format": "int32",
             "nullable": true
           },
-          "loc_description": {
+          "name": {
             "type": "string",
-            "description": "LocDescription [example: \"areál bez zeleně\"]",
+            "description": "Display name of the location.",
             "nullable": true
           },
-          "loc_orientation": {
+          "description": {
             "type": "string",
-            "description": "LocOrientation [example: \"východ-západ\"]",
+            "description": "Human-readable description of the location.",
             "nullable": true
           },
-          "loc_surface": {
+          "surface": {
             "type": "string",
-            "description": "LocSurface [example: \"asfalt/beton\"]",
-            "nullable": true
-          },
-          "address": {
-            "type": "string",
-            "description": "Address [example: \"Pražská tržnice\"]",
+            "description": "Surface type associated with the location.",
             "nullable": true
           },
           "points": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/LocationPoint"
+              "$ref": "#/components/schemas/Point"
             },
-            "description": "Points",
+            "description": "Measurement points belonging to the location.",
             "nullable": true
           }
         },
         "additionalProperties": false,
-        "description": "Microclimate location response model."
-      },
-      "LocationPoint": {
-        "type": "object",
-        "properties": {
-          "point_id": {
-            "type": "integer",
-            "description": "PointId",
-            "format": "int32"
-          },
-          "point_name": {
-            "type": "string",
-            "description": "PointName [example: \"Pražská tržnice osvětlení\"]",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "Microclimate location point response model."
+        "description": "Represents a microclimate location in Prague."
       },
       "Measurement": {
         "type": "object",
         "properties": {
-          "point_id": {
-            "type": "number",
-            "description": "PointId",
-            "format": "double",
+          "locationId": {
+            "type": "integer",
+            "description": "Identifier of the location the measurement belongs to.",
+            "format": "int32",
             "nullable": true
           },
-          "location_id": {
-            "type": "number",
-            "description": "LocationId",
-            "format": "double",
+          "pointId": {
+            "type": "integer",
+            "description": "Identifier of the point the measurement belongs to.",
+            "format": "int32",
             "nullable": true
           },
-          "measured_at": {
+          "type": {
             "type": "string",
-            "description": "MeasuredAt [example: \"2022-08-21T17:30:00.000Z\"]",
+            "description": "Internal measurement type code.",
+            "nullable": true
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit of the measured value.",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Date and time when the value was measured.",
             "format": "date-time",
-            "nullable": true
-          },
-          "measure": {
-            "type": "string",
-            "description": "Measure [example: \"air_temp200\"]",
             "nullable": true
           },
           "value": {
             "type": "number",
-            "description": "Value",
+            "description": "Numeric value of the measurement.",
             "format": "double",
-            "nullable": true
-          },
-          "unit": {
-            "type": "string",
-            "description": "Unit [example: \"°C\"]",
             "nullable": true
           }
         },
         "additionalProperties": false,
-        "description": "Microclimate measurement response model."
+        "description": "Represents a normalized microclimate measurement."
       },
-      "Point3": {
+      "Point": {
         "type": "object",
         "properties": {
-          "point_id": {
+          "id": {
             "type": "integer",
-            "description": "PointId",
-            "format": "int32"
-          },
-          "location_id": {
-            "type": "integer",
-            "description": "LocationId",
-            "format": "int32"
-          },
-          "point_named": {
-            "type": "string",
-            "description": "PointNamed [example: \"Pražská tržnice osvětlení\"]",
+            "description": "Unique identifier of the point.",
+            "format": "int32",
             "nullable": true
           },
-          "location": {
+          "name": {
             "type": "string",
-            "description": "LocationName [example: \"Pražská Holešovická tržnice\"]",
+            "description": "Display name of the point.",
             "nullable": true
           },
-          "loc_description": {
+          "description": {
             "type": "string",
-            "description": "LocDescription [example: \"areál bez zeleně\"]",
+            "description": "Human-readable description of the point.",
             "nullable": true
           },
-          "loc_orientation": {
+          "sensorPosition": {
             "type": "string",
-            "description": "LocOrientation [example: \"východ-západ\"]",
+            "description": "Physical placement or sensor position of the point.",
             "nullable": true
           },
-          "loc_surface": {
-            "type": "string",
-            "description": "LocSurface [example: \"asfalt/beton\"]",
-            "nullable": true
-          },
-          "lat": {
+          "latitude": {
             "type": "number",
-            "description": "Lat",
+            "description": "Latitude of the point.",
             "format": "double",
             "nullable": true
           },
-          "lng": {
+          "longitude": {
             "type": "number",
-            "description": "Lng",
+            "description": "Longitude of the point.",
             "format": "double",
             "nullable": true
           },
-          "x_jtsk": {
-            "type": "number",
-            "description": "XJtsk",
-            "format": "double",
-            "nullable": true
-          },
-          "y_jtsk": {
-            "type": "number",
-            "description": "YJtsk",
-            "format": "double",
-            "nullable": true
-          },
-          "elevation_m": {
-            "type": "number",
-            "description": "ElevationM",
-            "format": "double",
-            "nullable": true
-          },
-          "measures": {
+          "measurementTypes": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Point3Measure"
+              "type": "string"
             },
-            "description": "Measures",
-            "nullable": true
-          },
-          "sensor_position": {
-            "type": "string",
-            "description": "SensorPosition [example: \"veřejné osvětlení\"]",
-            "nullable": true
-          },
-          "sensor_position_detail": {
-            "type": "string",
-            "description": "SensorPositionDetail [example: \"veřejné osvětlení ve středu Tržnice\"]",
+            "description": "Measurement types available for the point.",
             "nullable": true
           }
         },
         "additionalProperties": false,
-        "description": "Microclimate point response model."
-      },
-      "Point3Measure": {
-        "type": "object",
-        "properties": {
-          "measure": {
-            "type": "string",
-            "description": "Measure [example: \"air_temp200\"]",
-            "nullable": true
-          },
-          "measure_cz": {
-            "type": "string",
-            "description": "MeasureCz [example: \"Teplota vzduchu, 200 cm\"]",
-            "nullable": true
-          },
-          "unit": {
-            "type": "string",
-            "description": "Unit [example: \"°C\"]",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "Microclimate point measure response model."
+        "description": "Represents a measurement point within a microclimate location."
       }
     }
   },

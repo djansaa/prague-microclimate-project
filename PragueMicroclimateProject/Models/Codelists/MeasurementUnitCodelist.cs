@@ -16,7 +16,7 @@ public static class MeasurementUnitCodelist
     public const string Percent = "PERCENT";
 
     /// <summary>
-    /// [KILOMETERS_PER_HOUR] Kilometers per second
+    /// [KILOMETERS_PER_HOUR] Kilometers per hour
     /// </summary>
     public const string KilometersPerHour = "KILOMETERS_PER_HOUR";
 }
