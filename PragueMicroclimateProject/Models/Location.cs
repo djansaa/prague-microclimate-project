@@ -24,4 +24,9 @@ public class Location
     /// Surface type associated with the location.
     /// </summary>
     public string? Surface { get; set; }
+
+    /// <summary>
+    /// Measurement points belonging to the location.
+    /// </summary>
+    public List<Point> Points { get; set; } = [];
 }

@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using PragueMicroclimateProject.Models;
 using PragueMicroclimateProject.WebServices.Golemio;
-using PragueMicroclimateProject.WebServices.Golemio.Models;
 
 namespace PragueMicroclimateProject.Controllers;
 
@@ -22,25 +22,14 @@ public class MicroclimateController : ControllerBase
     }
 
     /// <summary>
-    /// Get ALL microclimate locations.
-    /// </summary>
-    [HttpGet("locations")]
-    [ProducesResponseType(typeof(List<Location>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<Location>>> GetAllLocations(CancellationToken cancellationToken = default)
-    {
-        var locations = await _golemioService.GetAllLocations(cancellationToken);
-        return Ok(locations);
-    }
-
-    /// <summary>
     /// Get ALL microclimate locations and points.
     /// </summary>
     [HttpGet("locationsAndPoints")]
-    [ProducesResponseType(typeof(List<Point3>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<Point3>>> GetAllLocationsAndPoints(CancellationToken cancellationToken = default)
+    [ProducesResponseType(typeof(List<Location>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<Location>>> GetAllLocationsAndPoints(CancellationToken cancellationToken = default)
     {
-        var points = await _golemioService.GetAllLocationAndPoints(cancellationToken);
-        return Ok(points);
+        var locations = await _golemioService.GetAllLocationAndPoints(cancellationToken);
+        return Ok(locations);
     }
 
     /// <summary>

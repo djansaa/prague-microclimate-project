@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Caching.Hybrid;
+using PragueMicroclimateProject.Models;
 using PragueMicroclimateProject.WebServices.Golemio.Clients;
-using PragueMicroclimateProject.WebServices.Golemio.Models;
+using PragueMicroclimateProject.WebServices.Golemio.Mappers;
+using GolemioMeasurement = PragueMicroclimateProject.WebServices.Golemio.Models.Measurement;
+using GolemioPoint = PragueMicroclimateProject.WebServices.Golemio.Models.Point3;
 
 namespace PragueMicroclimateProject.WebServices.Golemio;
 
@@ -24,18 +27,19 @@ public partial class GolemioService
     }
 
     /// <summary>
-    /// Get all locations from Golemio.
+    /// Get all locations and their points from Golemio.
     /// </summary>
-    public async Task<List<Location>> GetAllLocations(CancellationToken cancellationToken = default)
+    public async Task<List<Location>> GetAllLocationAndPoints(CancellationToken cancellationToken = default)
     {
-        var cacheKey = "golemio:microclimate:locations:all";
+        const string cacheKey = "golemio:microclimate:locations-points:all";
 
         var locations = await _hybridCache.GetOrCreateAsync(
             cacheKey,
             async token =>
             {
                 _logger.LogDebug("Cache miss for {CacheKey}", cacheKey);
-                return await _client.GetMicroclimateLocationsAsync(cancellationToken: token);
+                var points = await _client.GetMicroclimatePointsAsync(cancellationToken: token) ?? [];
+                return MapLocations(points);
             },
             options: new HybridCacheEntryOptions
             {
@@ -45,30 +49,6 @@ public partial class GolemioService
             cancellationToken: cancellationToken);
 
         return locations ?? [];
-    }
-
-    /// <summary>
-    /// Get all locations and their points from Golemio.
-    /// </summary>
-    public async Task<List<Point3>> GetAllLocationAndPoints(CancellationToken cancellationToken = default)
-    {
-        var cacheKey = "golemio:microclimate:locations-points:all";
-
-        var points = await _hybridCache.GetOrCreateAsync(
-            cacheKey,
-            async token =>
-            {
-                _logger.LogDebug("Cache miss for {CacheKey}", cacheKey);
-                return await _client.GetMicroclimatePointsAsync(cancellationToken: token);
-            },
-            options: new HybridCacheEntryOptions
-            {
-                Expiration = TimeSpan.FromHours(1),
-                LocalCacheExpiration = TimeSpan.FromMinutes(10)
-            },
-            cancellationToken: cancellationToken);
-
-        return points ?? [];
     }
 
     /// <summary>
@@ -121,6 +101,7 @@ public partial class GolemioService
     {
         var cacheKey = $"golemio:microclimate:{locationId}:{pointId}:{measure}:{month:yyyy-MM}";
         var (monthStart, monthEnd) = GetMonthBounds(month, offset);
+        var externalMeasure = string.IsNullOrWhiteSpace(measure) ? null : MeasureTypeMapper.ToExternal(measure);
 
         var measurements = await _hybridCache.GetOrCreateAsync(
             cacheKey,
@@ -128,9 +109,10 @@ public partial class GolemioService
             {
                 _logger.LogDebug("Cache miss for {CacheKey}", cacheKey);
 
-                var tempMeasurements = await _client.GetMicroclimateMeasurementsAsync(locationId, pointId, measure, monthStart, monthEnd, cancellationToken: token) ?? [];
+                var rawMeasurements = await _client.GetMicroclimateMeasurementsAsync(locationId, pointId, externalMeasure, monthStart, monthEnd, cancellationToken: token) ?? [];
+                var mappedMeasurements = MapMeasurements(rawMeasurements);
 
-                return AggregateMeasurementsByHour(tempMeasurements);
+                return AggregateMeasurementsByHour(mappedMeasurements);
             },
             options: new HybridCacheEntryOptions
             {
@@ -142,36 +124,124 @@ public partial class GolemioService
         return measurements ?? [];
     }
 
+    private static List<Location> MapLocations(IEnumerable<GolemioPoint> points)
+    {
+        return points
+            .GroupBy(point => point.LocationId)
+            .Select(group =>
+            {
+                var firstPoint = group.First();
+
+                return new Location
+                {
+                    Id = firstPoint.LocationId,
+                    Name = firstPoint.LocationName,
+                    Description = firstPoint.LocDescription,
+                    Surface = firstPoint.LocSurface,
+                    Points = group
+                        .Select(MapPoint)
+                        .OrderBy(point => point.Id)
+                        .ToList()
+                };
+            })
+            .OrderBy(location => location.Id)
+            .ToList();
+    }
+
+    private static Point MapPoint(GolemioPoint point)
+    {
+        return new Point
+        {
+            Id = point.PointId,
+            Name = point.PointNamed,
+            Description = point.SensorPositionDetail ?? point.SensorPosition,
+            SensorPosition = point.SensorPosition,
+            Latitude = point.Lat,
+            Longitude = point.Lng,
+            MeasurementTypes = point.Measures?
+                .Where(measure => !string.IsNullOrWhiteSpace(measure.Measure))
+                .Select(measure => MeasureTypeMapper.ToInternal(measure.Measure))
+                .Distinct(StringComparer.Ordinal)
+                .OrderBy(measureType => measureType)
+                .ToList() ?? []
+        };
+    }
+
+    private static List<Measurement> MapMeasurements(IEnumerable<GolemioMeasurement> measurements)
+    {
+        return measurements
+            .Select(measurement => new Measurement
+            {
+                LocationId = ConvertIdentifier(measurement.LocationId, nameof(measurement.LocationId)),
+                PointId = ConvertIdentifier(measurement.PointId, nameof(measurement.PointId)),
+                Timestamp = measurement.MeasuredAt,
+                Type = MeasureTypeMapper.ToInternal(measurement.Measure),
+                Unit = MeasureUnitMapper.ToInternal(measurement.Unit),
+                Value = measurement.Value
+            })
+            .ToList();
+    }
+
     private static List<Measurement> AggregateMeasurementsByHour(IEnumerable<Measurement> measurements)
     {
         return measurements
-            .Where(m => m.MeasuredAt.HasValue)
-            .GroupBy(m => new DateTimeOffset(m.MeasuredAt!.Value.Year, m.MeasuredAt.Value.Month, m.MeasuredAt.Value.Day, m.MeasuredAt.Value.Hour, 0, 0, m.MeasuredAt.Value.Offset))
+            .Where(measurement => measurement.Timestamp.HasValue)
+            .GroupBy(measurement => new
+            {
+                measurement.LocationId,
+                measurement.PointId,
+                measurement.Type,
+                measurement.Unit,
+                Timestamp = new DateTimeOffset(
+                    measurement.Timestamp!.Value.Year,
+                    measurement.Timestamp.Value.Month,
+                    measurement.Timestamp.Value.Day,
+                    measurement.Timestamp.Value.Hour,
+                    0,
+                    0,
+                    measurement.Timestamp.Value.Offset)
+            })
             .Select(group =>
             {
-                var firstMeasurement = group.First();
-                var values = group.Where(m => m.Value.HasValue).Select(m => m.Value!.Value).ToList();
+                var values = group.Where(measurement => measurement.Value.HasValue).Select(measurement => measurement.Value!.Value).ToList();
 
                 return new Measurement
                 {
-                    LocationId = firstMeasurement.LocationId,
-                    PointId = firstMeasurement.PointId,
-                    MeasuredAt = group.Key,
-                    Measure = firstMeasurement.Measure,
-                    Value = values.Count > 0 ? Math.Round(values.Average(), 2) : null,
-                    Unit = firstMeasurement.Unit
+                    LocationId = group.Key.LocationId,
+                    PointId = group.Key.PointId,
+                    Type = group.Key.Type,
+                    Unit = group.Key.Unit,
+                    Timestamp = group.Key.Timestamp,
+                    Value = values.Count > 0 ? Math.Round(values.Average(), 2) : null
                 };
             })
-            .OrderBy(m => m.MeasuredAt)
+            .OrderBy(measurement => measurement.Timestamp)
             .ToList();
     }
 
     private static List<Measurement> FilterMeasurementsToRange(IEnumerable<Measurement> measurements, DateTimeOffset from, DateTimeOffset to)
     {
         return measurements
-            .Where(m => m.MeasuredAt.HasValue && m.MeasuredAt.Value >= from && m.MeasuredAt.Value <= to)
-            .OrderBy(m => m.MeasuredAt)
+            .Where(measurement => measurement.Timestamp.HasValue && measurement.Timestamp.Value >= from && measurement.Timestamp.Value <= to)
+            .OrderBy(measurement => measurement.Timestamp)
             .ToList();
+    }
+
+    private static int? ConvertIdentifier(double? value, string propertyName)
+    {
+        if (!value.HasValue)
+        {
+            return null;
+        }
+
+        var truncatedValue = Math.Truncate(value.Value);
+
+        if (Math.Abs(value.Value - truncatedValue) > 0.000001d || truncatedValue < int.MinValue || truncatedValue > int.MaxValue)
+        {
+            throw new ArgumentOutOfRangeException(propertyName, value, "Measurement identifier must be a whole number within Int32 range.");
+        }
+
+        return (int)truncatedValue;
     }
 
     private static (DateTimeOffset Start, DateTimeOffset End) GetMonthBounds(DateOnly month, TimeSpan offset)

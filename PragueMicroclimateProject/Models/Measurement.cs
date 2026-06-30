@@ -6,6 +6,16 @@ namespace PragueMicroclimateProject.Models;
 public class Measurement
 {
     /// <summary>
+    /// Identifier of the location the measurement belongs to.
+    /// </summary>
+    public int? LocationId { get; set; }
+
+    /// <summary>
+    /// Identifier of the point the measurement belongs to.
+    /// </summary>
+    public int? PointId { get; set; }
+
+    /// <summary>
     /// Internal measurement type code.
     /// </summary>
     public string? Type { get; set; }

@@ -38,5 +38,5 @@ public class Point
     /// <summary>
     /// Measurement types available for the point.
     /// </summary>
-    public List<string> MeasurementTypes { get; set; }
+    public List<string> MeasurementTypes { get; set; } = [];
 }

@@ -1,48 +1,33 @@
-﻿using PragueMicroclimateProject.Models.Codelists;
-using PragueMicroclimateProject.WebServices.Golemio.Codelists;
+using PragueMicroclimateProject.Models.Codelists;
 
 namespace PragueMicroclimateProject.WebServices.Golemio.Mappers;
 
 /// <summary>
-/// Mapping external Golemio measure units to internal measure units
+/// Maps external Golemio measure units to internal measurement unit codelists.
 /// </summary>
 public static class MeasureUnitMapper
 {
     /// <summary>
-    /// Convert Golemio measure unit to internal measure unit
+    /// Converts a raw Golemio unit string to an internal measurement unit code.
     /// </summary>
-    public static string? ToInternal(string? golemioUnit) => golemioUnit switch
+    public static string ToInternal(string? golemioUnit) => golemioUnit switch
     {
-        MicroclimateMeasureType.AirTemperature200 => MeasurementTypeCodelist.AirTemperature,
-        MicroclimateMeasureType.AirHumidity200 => MeasurementTypeCodelist.AirHumidity,
-        MicroclimateMeasureType.WindSpeed300 => MeasurementTypeCodelist.WindSpeed,
-        // MicroclimateMeasureType.AirHumidity50
-        // MicroclimateMeasureType.AirTemperature50
-        // MicroclimateMeasureType.DendrometerCircumference200
-        // MicroclimateMeasureType.DendrometerCircumferenceGain200
-        // MicroclimateMeasureType.Precipitation300
-        // MicroclimateMeasureType.Pressure200
-        // MicroclimateMeasureType.Pressure50
-        // MicroclimateMeasureType.SoilTemperatureMinus10
-        // MicroclimateMeasureType.SoilTemperatureMinus30
-        // MicroclimateMeasureType.SolarIrradiance200
-        // MicroclimateMeasureType.SoilWaterPotentialMinus10
-        // MicroclimateMeasureType.SoilWaterPotentialMinus30
-        // MicroclimateMeasureType.WindDirection300
-        // MicroclimateMeasureType.WindImpact300
-
+        "\u00B0C" => MeasurementUnitCodelist.Celsius,
+        "\u00C2\u00B0C" => MeasurementUnitCodelist.Celsius,
+        "deg C" => MeasurementUnitCodelist.Celsius,
+        "%" => MeasurementUnitCodelist.Percent,
+        "km/h" => MeasurementUnitCodelist.KilometersPerHour,
         _ => throw new ArgumentOutOfRangeException(nameof(golemioUnit), golemioUnit, "Unknown Golemio measure unit")
     };
 
     /// <summary>
-    /// Convert internal measure unit to Golemio measure unit
+    /// Converts an internal measurement unit code to the raw Golemio unit string.
     /// </summary>
-    public static string? ToExternal(string? measureUnit) => measureUnit switch
+    public static string ToExternal(string? measureUnit) => measureUnit switch
     {
-        MeasurementTypeCodelist.AirTemperature => MicroclimateMeasureType.AirTemperature200,
-        MeasurementTypeCodelist.AirHumidity => MicroclimateMeasureType.AirHumidity200,
-        MeasurementTypeCodelist.WindSpeed => MicroclimateMeasureType.WindSpeed300,
-
+        MeasurementUnitCodelist.Celsius => "\u00B0C",
+        MeasurementUnitCodelist.Percent => "%",
+        MeasurementUnitCodelist.KilometersPerHour => "km/h",
         _ => throw new ArgumentOutOfRangeException(nameof(measureUnit), measureUnit, "Unknown internal measure unit")
     };
 }

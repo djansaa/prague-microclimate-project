@@ -81,7 +81,7 @@ public static class MicroclimateMeasureType
     public const string WindDirection300 = "wind_dir300";
 
     /// <summary>
-    /// [wind_impact300] | Wind gust, 300 cm | km/h
+    /// [wind_impact300] | Wind impact, 300 cm | km/h
     /// </summary>
     public const string WindImpact300 = "wind_impact300";
 
