@@ -38,6 +38,7 @@ try
 
     // ### Add custom services ###
 
+    builder.Services.AddApplicationOptions();
     builder.Services.AddWebServices();
 
     // ### Build app ###
