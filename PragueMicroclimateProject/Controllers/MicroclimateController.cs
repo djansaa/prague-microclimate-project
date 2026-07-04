@@ -45,7 +45,7 @@ public class MicroclimateController : ControllerBase
     }
 
     /// <summary>
-    /// Get point measurements.
+    /// Get point measurements. TEST SOLUTION.
     /// </summary>
     [HttpGet("pointMeasurementsParallel")]
     [ProducesResponseType(typeof(List<Measurement>), StatusCodes.Status200OK)]

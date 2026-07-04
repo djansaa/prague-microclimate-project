@@ -8,7 +8,7 @@ public class GolemioOptions
     /// <summary>
     /// Section name in configuration
     /// </summary>
-    public const string SectionName = "Golemio";
+    public const string SectionName = "GolemioService";
 
     /// <summary>
     /// Base URL

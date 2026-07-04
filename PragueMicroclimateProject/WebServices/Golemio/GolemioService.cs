@@ -2,8 +2,6 @@ using Microsoft.Extensions.Caching.Hybrid;
 using PragueMicroclimateProject.Models;
 using PragueMicroclimateProject.WebServices.Golemio.Clients;
 using PragueMicroclimateProject.WebServices.Golemio.Mappers;
-using GolemioMeasurement = PragueMicroclimateProject.WebServices.Golemio.Models.Measurement;
-using GolemioPoint = PragueMicroclimateProject.WebServices.Golemio.Models.Point3;
 
 namespace PragueMicroclimateProject.WebServices.Golemio;
 
@@ -39,7 +37,7 @@ public partial class GolemioService
             {
                 _logger.LogDebug("Cache miss for {CacheKey}", cacheKey);
                 var points = await _client.GetMicroclimatePointsAsync(cancellationToken: token) ?? [];
-                return MapLocations(points);
+                return GolemioMicroclimateMapper.MapLocations(points);
             },
             options: new HybridCacheEntryOptions
             {
@@ -70,9 +68,9 @@ public partial class GolemioService
     }
 
     /// <summary>
-    /// Get point measurements from Golemio parallely.
+    /// Get point measurements from Golemio parallely. TEST SOLUTION.
     /// </summary>
-    public async ValueTask<List<Measurement>> GetPointMeasurementsParallel(int? locationId = null, int? pointId = null, string? measure = null, DateTimeOffset? from = null, DateTimeOffset? to = null, CancellationToken cancellationToken = default)
+    public async Task<List<Measurement>> GetPointMeasurementsParallel(int? locationId = null, int? pointId = null, string? measure = null, DateTimeOffset? from = null, DateTimeOffset? to = null, CancellationToken cancellationToken = default)
     {
         var (rangeStart, rangeEnd) = GetValidatedRange(from, to);
         var monthsToGet = GetMonthsBetween(rangeStart, rangeEnd);
@@ -97,6 +95,9 @@ public partial class GolemioService
         return FilterMeasurementsToRange(results.Where(x => x is not null).SelectMany(x => x!), rangeStart, rangeEnd);
     }
 
+    /// <summary>
+    /// Get monthly measurements from Golemio.
+    /// </summary>
     private async Task<List<Measurement>> GetMonthlyMeasurementsAsync(int? locationId, int? pointId, string? measure, DateOnly month, TimeSpan offset, CancellationToken cancellationToken)
     {
         var cacheKey = $"golemio:microclimate:{locationId}:{pointId}:{measure}:{month:yyyy-MM}";
@@ -110,7 +111,9 @@ public partial class GolemioService
                 _logger.LogDebug("Cache miss for {CacheKey}", cacheKey);
 
                 var rawMeasurements = await _client.GetMicroclimateMeasurementsAsync(locationId, pointId, externalMeasure, monthStart, monthEnd, cancellationToken: token) ?? [];
-                var mappedMeasurements = MapMeasurements(rawMeasurements);
+
+                // map measurements to internal model
+                var mappedMeasurements = GolemioMicroclimateMapper.MapMeasurements(rawMeasurements);
 
                 return AggregateMeasurementsByHour(mappedMeasurements);
             },
@@ -124,64 +127,9 @@ public partial class GolemioService
         return measurements ?? [];
     }
 
-    private static List<Location> MapLocations(IEnumerable<GolemioPoint> points)
-    {
-        return points
-            .GroupBy(point => point.LocationId)
-            .Select(group =>
-            {
-                var firstPoint = group.First();
-
-                return new Location
-                {
-                    Id = firstPoint.LocationId,
-                    Name = firstPoint.LocationName,
-                    Description = firstPoint.LocDescription,
-                    Surface = firstPoint.LocSurface,
-                    Points = group
-                        .Select(MapPoint)
-                        .OrderBy(point => point.Id)
-                        .ToList()
-                };
-            })
-            .OrderBy(location => location.Id)
-            .ToList();
-    }
-
-    private static Point MapPoint(GolemioPoint point)
-    {
-        return new Point
-        {
-            Id = point.PointId,
-            Name = point.PointNamed,
-            Description = point.SensorPositionDetail ?? point.SensorPosition,
-            SensorPosition = point.SensorPosition,
-            Latitude = point.Lat,
-            Longitude = point.Lng,
-            MeasurementTypes = point.Measures?
-                .Where(measure => !string.IsNullOrWhiteSpace(measure.Measure))
-                .Select(measure => MeasureTypeMapper.ToInternal(measure.Measure))
-                .Distinct(StringComparer.Ordinal)
-                .OrderBy(measureType => measureType)
-                .ToList() ?? []
-        };
-    }
-
-    private static List<Measurement> MapMeasurements(IEnumerable<GolemioMeasurement> measurements)
-    {
-        return measurements
-            .Select(measurement => new Measurement
-            {
-                LocationId = ConvertIdentifier(measurement.LocationId, nameof(measurement.LocationId)),
-                PointId = ConvertIdentifier(measurement.PointId, nameof(measurement.PointId)),
-                Timestamp = measurement.MeasuredAt,
-                Type = MeasureTypeMapper.ToInternal(measurement.Measure),
-                Unit = MeasureUnitMapper.ToInternal(measurement.Unit),
-                Value = measurement.Value
-            })
-            .ToList();
-    }
-
+    /// <summary>
+    /// Get aggregated measurements by hour.
+    /// </summary>
     private static List<Measurement> AggregateMeasurementsByHour(IEnumerable<Measurement> measurements)
     {
         return measurements
@@ -219,6 +167,9 @@ public partial class GolemioService
             .ToList();
     }
 
+    /// <summary>
+    /// Filter measurements to the specified range.
+    /// </summary>
     private static List<Measurement> FilterMeasurementsToRange(IEnumerable<Measurement> measurements, DateTimeOffset from, DateTimeOffset to)
     {
         return measurements
@@ -227,23 +178,9 @@ public partial class GolemioService
             .ToList();
     }
 
-    private static int? ConvertIdentifier(double? value, string propertyName)
-    {
-        if (!value.HasValue)
-        {
-            return null;
-        }
-
-        var truncatedValue = Math.Truncate(value.Value);
-
-        if (Math.Abs(value.Value - truncatedValue) > 0.000001d || truncatedValue < int.MinValue || truncatedValue > int.MaxValue)
-        {
-            throw new ArgumentOutOfRangeException(propertyName, value, "Measurement identifier must be a whole number within Int32 range.");
-        }
-
-        return (int)truncatedValue;
-    }
-
+    /// <summary>
+    /// Get month bounds for the specified month.
+    /// </summary>
     private static (DateTimeOffset Start, DateTimeOffset End) GetMonthBounds(DateOnly month, TimeSpan offset)
     {
         var monthStart = new DateTimeOffset(month.Year, month.Month, 1, 0, 0, 0, offset);
@@ -251,6 +188,9 @@ public partial class GolemioService
         return (monthStart, monthEnd);
     }
 
+    /// <summary>
+    /// Get months between the specified datetimes.
+    /// </summary>
     private static List<DateOnly> GetMonthsBetween(DateTimeOffset from, DateTimeOffset to)
     {
         var months = new List<DateOnly>();
@@ -266,6 +206,9 @@ public partial class GolemioService
         return months;
     }
 
+    /// <summary>
+    /// Validate date range.
+    /// </summary>
     private static (DateTimeOffset Start, DateTimeOffset End) GetValidatedRange(DateTimeOffset? from, DateTimeOffset? to)
     {
         if (!from.HasValue || !to.HasValue)
