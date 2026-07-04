@@ -2,6 +2,8 @@ using PragueMicroclimateProject.Models;
 using GolemioMeasurement = PragueMicroclimateProject.WebServices.Golemio.Models.Measurement;
 using GolemioPoint = PragueMicroclimateProject.WebServices.Golemio.Models.Point3;
 
+#pragma warning disable CS8619 // Disable warning for nullability mismatch in return type
+
 namespace PragueMicroclimateProject.WebServices.Golemio.Mappers;
 
 /// <summary>
@@ -28,11 +30,11 @@ public static class GolemioMicroclimateMapper
                     Surface = firstPoint.LocSurface,
                     Points = group
                         .Select(MapPoint)
-                        .OrderBy(point => point.Id)
+                        .Where(point => point.MeasurementTypes.Any())
                         .ToList()
                 };
             })
-            .OrderBy(location => location.Id)
+            .Where(location => location.Points.Any())
             .ToList();
     }
 
@@ -65,9 +67,8 @@ public static class GolemioMicroclimateMapper
             Latitude = point.Lat,
             Longitude = point.Lng,
             MeasurementTypes = point.Measures?
-                .Where(measure => !string.IsNullOrWhiteSpace(measure.Measure))
                 .Select(measure => MeasureTypeMapper.ToInternal(measure.Measure!))
-                .Distinct(StringComparer.Ordinal)
+                .Where(measureType => !string.IsNullOrWhiteSpace(measureType))
                 .ToList() ?? []
         };
     }
