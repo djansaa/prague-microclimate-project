@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Options;
 using PragueMicroclimateProject.Models;
+using PragueMicroclimateProject.Options;
 using PragueMicroclimateProject.WebServices.Golemio.Clients;
 using PragueMicroclimateProject.WebServices.Golemio.Mappers;
 
@@ -13,15 +15,17 @@ public partial class GolemioService
     private readonly ILogger<GolemioService> _logger;
     private readonly GolemioClient _client;
     private readonly HybridCache _hybridCache;
+    private readonly ApplicationOptions _applicationOptions;
 
     /// <summary>
     /// ctor
     /// </summary>
-    public GolemioService(GolemioClient client, HybridCache hybridCache, ILogger<GolemioService> logger)
+    public GolemioService(GolemioClient client, HybridCache hybridCache, ILogger<GolemioService> logger, IOptions<ApplicationOptions> applicationOptions)
     {
         _client = client;
         _hybridCache = hybridCache;
         _logger = logger;
+        _applicationOptions = applicationOptions.Value;
     }
 
     /// <summary>
@@ -54,13 +58,13 @@ public partial class GolemioService
     /// </summary>
     public async Task<List<Measurement>> GetPointMeasurements(int? locationId = null, int? pointId = null, string? measure = null, DateTimeOffset? from = null, DateTimeOffset? to = null, CancellationToken cancellationToken = default)
     {
-        var (rangeStart, rangeEnd) = GetValidatedRange(from, to);
+        var (rangeStart, rangeEnd, normalizedMeasure) = ValidateMeasurementRequest(measure, from, to);
         var monthsToGet = GetMonthsBetween(rangeStart, rangeEnd);
         var allMeasurements = new List<Measurement>();
 
         foreach (var month in monthsToGet)
         {
-            var monthlyMeasurements = await GetMonthlyMeasurementsAsync(locationId, pointId, measure, month, rangeStart.Offset, cancellationToken);
+            var monthlyMeasurements = await GetMonthlyMeasurementsAsync(locationId, pointId, normalizedMeasure, month, rangeStart.Offset, cancellationToken);
             allMeasurements.AddRange(monthlyMeasurements);
         }
 
@@ -72,7 +76,7 @@ public partial class GolemioService
     /// </summary>
     public async Task<List<Measurement>> GetPointMeasurementsParallel(int? locationId = null, int? pointId = null, string? measure = null, DateTimeOffset? from = null, DateTimeOffset? to = null, CancellationToken cancellationToken = default)
     {
-        var (rangeStart, rangeEnd) = GetValidatedRange(from, to);
+        var (rangeStart, rangeEnd, normalizedMeasure) = ValidateMeasurementRequest(measure, from, to);
         var monthsToGet = GetMonthsBetween(rangeStart, rangeEnd);
         var throttler = new SemaphoreSlim(3);
 
@@ -82,7 +86,7 @@ public partial class GolemioService
 
             try
             {
-                return await GetMonthlyMeasurementsAsync(locationId, pointId, measure, month, rangeStart.Offset, cancellationToken);
+                return await GetMonthlyMeasurementsAsync(locationId, pointId, normalizedMeasure, month, rangeStart.Offset, cancellationToken);
             }
             finally
             {
@@ -92,7 +96,9 @@ public partial class GolemioService
 
         var results = await Task.WhenAll(tasks);
 
-        return FilterMeasurementsToRange(results.Where(x => x is not null).SelectMany(x => x!), rangeStart, rangeEnd);
+        var filtered = FilterMeasurementsToRange(results.Where(x => x is not null).SelectMany(x => x!), rangeStart, rangeEnd);
+
+        return filtered;
     }
 
     /// <summary>
@@ -207,13 +213,18 @@ public partial class GolemioService
     }
 
     /// <summary>
-    /// Validate date range.
+    /// Validate measurement request.
     /// </summary>
-    private static (DateTimeOffset Start, DateTimeOffset End) GetValidatedRange(DateTimeOffset? from, DateTimeOffset? to)
+    private (DateTimeOffset Start, DateTimeOffset End, string? Measure) ValidateMeasurementRequest(string? measure, DateTimeOffset? from, DateTimeOffset? to)
     {
-        if (!from.HasValue || !to.HasValue)
+        if (!from.HasValue)
         {
-            throw new ArgumentException("'from' and 'to' must be provided.");
+            throw new ArgumentException("'from' must be provided.", nameof(from));
+        }
+
+        if (!to.HasValue)
+        {
+            throw new ArgumentException("'to' must be provided.", nameof(to));
         }
 
         if (from > to)
@@ -221,6 +232,18 @@ public partial class GolemioService
             throw new ArgumentException("'from' must be less than or equal to 'to'.");
         }
 
-        return (from.Value, to.Value);
+        var monthsToGet = GetMonthsBetween(from.Value, to.Value);
+        if (monthsToGet.Count > _applicationOptions.MaxCalendarMonthsPerRequest)
+        {
+            throw new ArgumentException($"The selected date range can span at most {_applicationOptions.MaxCalendarMonthsPerRequest} calendar months.");
+        }
+
+        var normalizedMeasure = string.IsNullOrWhiteSpace(measure) ? null : measure.Trim();
+        if (normalizedMeasure is not null && !_applicationOptions.EnabledMeasurementTypes.Contains(normalizedMeasure, StringComparer.Ordinal))
+        {
+            throw new ArgumentException($"'measure' must be one of the enabled measurement types: {string.Join(", ", _applicationOptions.EnabledMeasurementTypes)}.", nameof(measure));
+        }
+
+        return (from.Value, to.Value, normalizedMeasure);
     }
 }

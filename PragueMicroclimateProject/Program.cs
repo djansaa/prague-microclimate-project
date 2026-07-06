@@ -36,6 +36,8 @@ try
 
     builder.Services.AddHybridCache();
 
+    builder.Services.AddProblemDetails(); // failed requests response with problem details
+
     // ### Add custom services ###
 
     builder.Services.AddApplicationOptions();

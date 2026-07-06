@@ -14,4 +14,9 @@ public class ApplicationOptions
     /// Enabled measurement types.
     /// </summary>
     public List<string> EnabledMeasurementTypes { get; set; } = [];
+
+    /// <summary>
+    /// Maximum number of calendar months allowed in a single measurement request.
+    /// </summary>
+    public int MaxCalendarMonthsPerRequest { get; set; } = 3;
 }

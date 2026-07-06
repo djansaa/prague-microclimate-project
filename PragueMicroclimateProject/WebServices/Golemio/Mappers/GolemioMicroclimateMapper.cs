@@ -56,6 +56,9 @@ public static class GolemioMicroclimateMapper
             .ToList();
     }
 
+    /// <summary>
+    /// Converts Golemio point into internal point model.
+    /// </summary>
     private static Point MapPoint(GolemioPoint point)
     {
         return new Point
