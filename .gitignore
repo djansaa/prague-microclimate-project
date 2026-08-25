@@ -9,6 +9,7 @@ appsettings.Production.json
 
 # dotenv files
 .env
+!docker/.env
 
 ### react ###
 # Logs
