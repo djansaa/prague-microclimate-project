@@ -1,4 +1,5 @@
 using PragueMicroclimateProject.DependencyInjection;
+using PragueMicroclimateProject.Options;
 using Serilog;
 using System.Reflection;
 
@@ -19,7 +20,19 @@ try
     {
         configuration
             .ReadFrom.Configuration(context.Configuration)
-            .WriteTo.Console(); // always write to console (do not have to be in serilog config)
+            .WriteTo.Console() // always write to console (do not have to be in serilog config)
+            .Enrich.WithProperty("environment", builder.Environment.EnvironmentName);
+
+        var logstashOptions = context.Configuration
+            .GetSection(LogstashOptions.SectionName)
+            .Get<LogstashOptions>() ?? new LogstashOptions();
+
+        if (!string.IsNullOrWhiteSpace(logstashOptions.RequestUri))
+        {
+            configuration.WriteTo.Http(
+                requestUri: logstashOptions.RequestUri,
+                queueLimitBytes: logstashOptions.QueueLimitBytes);
+        }
     });
 
     // ### Add services ###

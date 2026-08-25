@@ -14,6 +14,7 @@ public static class ConfigureServiceCollection
     public static void AddApplicationOptions(this IServiceCollection services)
     {
         services.AddOptions<ApplicationOptions>().BindConfiguration(ApplicationOptions.SectionName);
+        services.AddOptions<LogstashOptions>().BindConfiguration(LogstashOptions.SectionName);
     }
 
     /// <summary>
