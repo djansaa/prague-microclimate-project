@@ -82,13 +82,17 @@ function PragueMap() {
             setMeasurementError("");
             setMeasurementResult(null);
 
-            const response = await microclimateApi.api.microclimatePointMeasurementsList({
+            const requestQuery = {
                 from: query.from,
                 locationId: query.locationId,
                 measure: query.measure,
                 pointId: query.pointId,
                 to: query.to,
-            });
+            };
+
+            const response = query.mode === "demo"
+                ? await microclimateApi.api.microclimatePointMeasurementsParallelList(requestQuery)
+                : await microclimateApi.api.microclimatePointMeasurementsList(requestQuery);
 
             setMeasurementResult({
                 items: response.data,

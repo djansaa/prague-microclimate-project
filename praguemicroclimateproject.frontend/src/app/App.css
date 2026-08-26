@@ -67,7 +67,8 @@
 
 .text-button,
 .icon-button,
-.primary-button {
+.primary-button,
+.secondary-button {
   border: 0;
   font: inherit;
   cursor: pointer;
@@ -111,6 +112,25 @@
 
 .primary-button:disabled {
   background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid #99f6e4;
+  border-radius: 6px;
+  color: #0f766e;
+  background: #f0fdfa;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.secondary-button:disabled {
+  color: #94a3b8;
+  border-color: #cbd5e1;
+  background: #f8fafc;
   cursor: not-allowed;
 }
 
@@ -228,6 +248,13 @@
   gap: 10px;
 }
 
+.chart-action-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
 .inline-error {
   margin: 10px 0 0;
   padding: 10px 12px;
@@ -331,6 +358,7 @@
   }
 
   .date-input-row,
+  .chart-action-row,
   .point-meta-grid {
     grid-template-columns: 1fr;
   }

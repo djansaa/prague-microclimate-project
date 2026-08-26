@@ -43,7 +43,10 @@ function PointDetailsPanel({ errorMessage, isLoading, point, result, onApply, on
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        applyQuery("normal");
+    }
 
+    function applyQuery(mode: MeasurementQuery["mode"]) {
         if (!point) {
             return;
         }
@@ -63,6 +66,7 @@ function PointDetailsPanel({ errorMessage, isLoading, point, result, onApply, on
             from: toApiDateTime(from),
             locationId: point.locationId ?? undefined,
             measure: selectedMeasure,
+            mode,
             pointId: point.id ?? undefined,
             to: toApiDateTime(to),
         });
@@ -136,9 +140,19 @@ function PointDetailsPanel({ errorMessage, isLoading, point, result, onApply, on
                     </label>
                 </div>
 
-                <button className="primary-button" disabled={!canSubmit} type="submit">
-                    {isLoading ? "Loading..." : "Show chart"}
-                </button>
+                <div className="chart-action-row">
+                    <button className="primary-button" disabled={!canSubmit} type="submit">
+                        {isLoading ? "Loading..." : "Show chart"}
+                    </button>
+                    <button
+                        className="secondary-button"
+                        disabled={!canSubmit}
+                        type="button"
+                        onClick={() => applyQuery("demo")}
+                    >
+                        Show chart (demo)
+                    </button>
+                </div>
             </form>
 
             {(validationError || errorMessage) && (

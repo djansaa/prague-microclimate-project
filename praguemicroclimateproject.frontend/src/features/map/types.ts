@@ -16,6 +16,7 @@ export type MeasurementQuery = {
     pointId?: number;
     measure: string;
     from: string;
+    mode: "normal" | "demo";
     to: string;
 };
 
