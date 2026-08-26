@@ -13,7 +13,7 @@ public static class MicroclimateMeasureUnit
     /// <summary>
     /// [deg C] Degrees Celsius
     /// </summary>
-    public const string DegreesCelsius = "deg C";
+    public const string DegreesCelsius = "°C";
 
     /// <summary>
     /// [mm] Millimeters

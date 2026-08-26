@@ -27,7 +27,7 @@ public static class GolemioMicroclimateMapper
                     Id = firstPoint.LocationId,
                     Name = firstPoint.LocationName,
                     Description = firstPoint.LocDescription,
-                    Surface = firstPoint.LocSurface,
+                    Surface = SurfaceTypeMapper.ToInternal(firstPoint.LocSurface),
                     Points = group
                         .Select(MapPoint)
                         .Where(point => point.MeasurementTypes.Any())
@@ -66,7 +66,7 @@ public static class GolemioMicroclimateMapper
             Id = point.PointId,
             Name = point.PointNamed,
             Description = point.SensorPositionDetail ?? point.SensorPosition,
-            SensorPosition = point.SensorPosition,
+            SensorPosition = SensorPositionTypeMapper.ToInternal(point.SensorPosition),
             Latitude = point.Lat,
             Longitude = point.Lng,
             MeasurementTypes = point.Measures?
