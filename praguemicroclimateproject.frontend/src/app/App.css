@@ -293,6 +293,7 @@
 
 .chart-scroll {
   width: 100%;
+  padding: 4px 0 2px;
   overflow-x: auto;
   overflow-y: hidden;
   border: 1px solid #dbe3ec;

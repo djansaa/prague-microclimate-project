@@ -31,7 +31,7 @@ function MeasurementChart({ data, measurementLabel, unit }: MeasurementChartProp
                 <LineChart
                     data={data}
                     height={300}
-                    margin={{ bottom: 28, left: 12, right: 24, top: 16 }}
+                    margin={{ bottom: 28, left: 28, right: 24, top: 20 }}
                     width={chartWidth}
                 >
                     <CartesianGrid stroke="#d7dee8" strokeDasharray="4 4" />
@@ -45,10 +45,17 @@ function MeasurementChart({ data, measurementLabel, unit }: MeasurementChartProp
                         tick={{ fontSize: 12 }}
                     />
                     <YAxis
-                        label={{ angle: -90, position: "insideLeft", value: yAxisLabel }}
+                        label={{
+                            angle: -90,
+                            offset: 14,
+                            position: "insideLeft",
+                            style: { fill: "#526173", fontSize: 12, fontWeight: 700 },
+                            textAnchor: "middle",
+                            value: yAxisLabel,
+                        }}
                         stroke="#526173"
                         tick={{ fontSize: 12 }}
-                        width={78}
+                        width={88}
                     />
                     <Tooltip formatter={(value) => formatTooltipValue(value, unit)} labelClassName="chart-tooltip-label" />
                     <Line
