@@ -136,7 +136,7 @@ public partial class GolemioService
     /// <summary>
     /// Get aggregated measurements by hour.
     /// </summary>
-    private static List<Measurement> AggregateMeasurementsByHour(IEnumerable<Measurement> measurements)
+    internal static List<Measurement> AggregateMeasurementsByHour(IEnumerable<Measurement> measurements)
     {
         return measurements
             .Where(measurement => measurement.Timestamp.HasValue)
@@ -176,7 +176,7 @@ public partial class GolemioService
     /// <summary>
     /// Filter measurements to the specified range.
     /// </summary>
-    private static List<Measurement> FilterMeasurementsToRange(IEnumerable<Measurement> measurements, DateTimeOffset from, DateTimeOffset to)
+    internal static List<Measurement> FilterMeasurementsToRange(IEnumerable<Measurement> measurements, DateTimeOffset from, DateTimeOffset to)
     {
         return measurements
             .Where(measurement => measurement.Timestamp.HasValue && measurement.Timestamp.Value >= from && measurement.Timestamp.Value <= to)
@@ -187,7 +187,7 @@ public partial class GolemioService
     /// <summary>
     /// Get month bounds for the specified month.
     /// </summary>
-    private static (DateTimeOffset Start, DateTimeOffset End) GetMonthBounds(DateOnly month, TimeSpan offset)
+    internal static (DateTimeOffset Start, DateTimeOffset End) GetMonthBounds(DateOnly month, TimeSpan offset)
     {
         var monthStart = new DateTimeOffset(month.Year, month.Month, 1, 0, 0, 0, offset);
         var monthEnd = monthStart.AddMonths(1).AddTicks(-1);
@@ -197,7 +197,7 @@ public partial class GolemioService
     /// <summary>
     /// Get months between the specified datetimes.
     /// </summary>
-    private static List<DateOnly> GetMonthsBetween(DateTimeOffset from, DateTimeOffset to)
+    internal static List<DateOnly> GetMonthsBetween(DateTimeOffset from, DateTimeOffset to)
     {
         var months = new List<DateOnly>();
         var current = new DateOnly(from.Year, from.Month, 1);
@@ -215,7 +215,7 @@ public partial class GolemioService
     /// <summary>
     /// Validate measurement request.
     /// </summary>
-    private (DateTimeOffset Start, DateTimeOffset End, string? Measure) ValidateMeasurementRequest(string? measure, DateTimeOffset? from, DateTimeOffset? to)
+    internal (DateTimeOffset Start, DateTimeOffset End, string? Measure) ValidateMeasurementRequest(string? measure, DateTimeOffset? from, DateTimeOffset? to)
     {
         if (!from.HasValue)
         {
