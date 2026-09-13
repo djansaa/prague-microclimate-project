@@ -3,5 +3,6 @@
     <Build />
     <Deploy />
   </Project>
+  <Project Path="PragueMicroclimateProject.Tests/PragueMicroclimateProject.Tests.csproj" Id="c01e81c1-e563-4655-aa94-6027e06f3799" />
   <Project Path="PragueMicroclimateProject/PragueMicroclimateProject.csproj" />
 </Solution>

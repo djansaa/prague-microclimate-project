@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="PragueMicroclimateProject.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Options\" />
     <Folder Include="WebServices\Golemio\Models\" />
     <Folder Include="WebServices\Golemio\Codelists\" />
