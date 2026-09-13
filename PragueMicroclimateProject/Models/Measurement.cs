@@ -3,7 +3,7 @@ namespace PragueMicroclimateProject.Models;
 /// <summary>
 /// Represents a normalized microclimate measurement.
 /// </summary>
-public class Measurement
+public record Measurement
 {
     /// <summary>
     /// Identifier of the location the measurement belongs to.

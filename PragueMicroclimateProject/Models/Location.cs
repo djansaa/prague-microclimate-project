@@ -3,7 +3,7 @@ namespace PragueMicroclimateProject.Models;
 /// <summary>
 /// Represents a microclimate location in Prague.
 /// </summary>
-public class Location
+public record Location
 {
     /// <summary>
     /// Unique identifier of the location.

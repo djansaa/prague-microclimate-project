@@ -3,7 +3,7 @@ namespace PragueMicroclimateProject.Models;
 /// <summary>
 /// Represents a measurement point within a microclimate location.
 /// </summary>
-public class Point
+public record Point
 {
     /// <summary>
     /// Unique identifier of the point.

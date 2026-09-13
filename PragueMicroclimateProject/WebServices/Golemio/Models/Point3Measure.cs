@@ -5,7 +5,7 @@ namespace PragueMicroclimateProject.WebServices.Golemio.Models;
 /// <summary>
 /// Microclimate point measure response model.
 /// </summary>
-public class Point3Measure
+public record Point3Measure
 {
     /// <summary>
     /// Measure [example: "air_temp200"]
